@@ -22,12 +22,6 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     return realsize; // 返回接收到的数据大小
 }
 
-void initHeaders(HEADERS *headers) {
-    headers->key = NULL;
-    headers->value = NULL;
-    headers->next = NULL;
-}
-
 HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
     HEADERS *newHeader = (HEADERS *) malloc(sizeof(HEADERS));
     if (newHeader == NULL) {

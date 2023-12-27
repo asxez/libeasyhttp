@@ -26,7 +26,6 @@ typedef struct HEADERS {
 } HEADERS; //头部结构
 
 
-void initHeaders(HEADERS *headers); //初始化头
 HEADERS *addHeader(HEADERS *headers, const char *key, const char *value); //headers增加
 void freeHeaders(HEADERS *headers); //释放头内存
 
