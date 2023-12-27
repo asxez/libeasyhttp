@@ -43,7 +43,20 @@ int main(void) {
 }
 ```
 
-## 🎉许可证
+HTTP_RESPONSE结构定义：
 
+```C
+typedef struct HTTP_RESPONSE {
+long status; //请求状态码
+char *text; //文本
+double total_time; //请求耗时
+} HTTP_RESPONSE;
+```
+
+注意：你所定义的**headerList**和**postData**不需要**free()**，我已经帮你处理了。
+## 🎉许可证
 GPL3.0
 
+## 🎁Stars
+
+如果本项目对你有帮助，就来个小小的stars哦。
