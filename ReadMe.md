@@ -12,7 +12,7 @@
 
 int main(void) {
     HEADERS *headerList = NULL;
-    headerList = addHeader(headerList, "Content-Type", "application/text");
+    headerList = addHeader(headerList, "Content-Type", "text/html; charset=utf-8");
     headerList = addHeader(headerList, "User-Agent", "ASXE");
     
     HTTP_RESPONSE httpResponse = get("https://www.asxe.vip/", headerList);
