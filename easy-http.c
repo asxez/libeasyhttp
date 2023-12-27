@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <curl/curl.h>
-#include <windows.h>
 #include <string.h>
 #include "easy-http.h"
 
@@ -29,24 +28,39 @@ void initHeaders(HEADERS *headers) {
     headers->next = NULL;
 }
 
-HEADERS addHeader(HEADERS *headers, const char *key, const char *value) {
-    if (headers->next == NULL) {
-        headers->key = key;
-        headers->value = value;
-        headers->next = NULL;
-        return *headers;
+HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
+    HEADERS *newHeader = (HEADERS *) malloc(sizeof(HEADERS));
+    if (newHeader == NULL) {
+        printf("Memory allocation failed!\n");
+        return NULL;
     }
+
+    newHeader->key = key;
+    newHeader->value = value;
+    newHeader->next = NULL;
+
+    if (headers == NULL) {
+        return newHeader;
+    }
+
     HEADERS *temp = headers;
     while (temp->next != NULL) {
         temp = temp->next;
     }
-    temp->key = key;
-    temp->value = value;
-    temp->next = NULL;
-    return *headers;
+    temp->next = newHeader;
+    return headers;
 }
 
-HTTP_RESPONSE get(const char *url, HEADERS headers) {
+void freeHeaders(HEADERS *headers) {
+    HEADERS *current = headers;
+    while (current != NULL) {
+        HEADERS *temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
+
+HTTP_RESPONSE get(const char *url, HEADERS *headers) {
     char str[1024] = "";
 
     CURL *curl;
@@ -60,15 +74,17 @@ HTTP_RESPONSE get(const char *url, HEADERS headers) {
 
     curl = curl_easy_init();
     if (curl) {
-        struct curl_slist *header = NULL;
-        while (headers.next != NULL) {
-            strcat(str, headers.key);
+        struct curl_slist *headerList = NULL;
+        HEADERS *temp = headers;
+        while (temp != NULL) {
+            strcat(str, headers->key);
             strcat(str, ": ");
-            strcat(str, headers.value);
-            header = curl_slist_append(header, str);
+            strcat(str, headers->value);
+            headerList = curl_slist_append(headerList, str);
+            temp = temp->next;
         }
         curl_easy_setopt(curl, CURLOPT_URL, url);
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &chunk);
 
@@ -87,8 +103,9 @@ HTTP_RESPONSE get(const char *url, HEADERS headers) {
                 fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
         }
         curl_easy_cleanup(curl);
-        curl_slist_free_all(header);
+        curl_slist_free_all(headerList);
         free(chunk.memory);
+        freeHeaders(temp);
     }
     return httpResponse;
 }
