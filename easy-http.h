@@ -25,10 +25,19 @@ typedef struct HEADERS {
     struct HEADERS *next;
 } HEADERS; //头部结构
 
+typedef struct POST_DATA {
+    const char *key;
+    const char *value;
+    struct POST_DATA *next;
+} POST_DATA; //post上传的数据
+
 
 HEADERS *addHeader(HEADERS *headers, const char *key, const char *value); //headers增加
 void freeHeaders(HEADERS *headers); //释放头内存
+POST_DATA *addData(POST_DATA *postData, const char *key, const char *value);
+
+void freePostData(POST_DATA *postData);
 
 HTTP_RESPONSE get(const char *url, HEADERS *headers); //get请求
-HTTP_RESPONSE post(const char *url); //post请求
+HTTP_RESPONSE post(const char *url, HEADERS *headers, POST_DATA *postData); //post请求
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata); //回调函数

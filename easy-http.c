@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <curl/curl.h>
 #include <string.h>
 #include "easy-http.h"
@@ -33,16 +32,35 @@ HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
     newHeader->value = value;
     newHeader->next = NULL;
 
-    if (headers == NULL) {
+    if (headers == NULL)
         return newHeader;
-    }
 
     HEADERS *temp = headers;
-    while (temp->next != NULL) {
+    while (temp->next != NULL)
         temp = temp->next;
-    }
     temp->next = newHeader;
     return headers;
+}
+
+POST_DATA *addData(POST_DATA *postData, const char *key, const char *value) {
+    POST_DATA *newData = (POST_DATA *) malloc(sizeof(POST_DATA));
+    if (newData == NULL) {
+        printf("Memory allocation failed!\n");
+        return NULL;
+    }
+
+    newData->key = key;
+    newData->value = value;
+    newData->next = NULL;
+
+    if (postData == NULL)
+        return newData;
+
+    POST_DATA *temp = postData;
+    while (temp->next != NULL)
+        temp = temp->next;
+    temp->next = newData;
+    return postData;
 }
 
 void freeHeaders(HEADERS *headers) {
@@ -54,9 +72,16 @@ void freeHeaders(HEADERS *headers) {
     }
 }
 
-HTTP_RESPONSE get(const char *url, HEADERS *headers) {
-    char str[1024] = "";
+void freePostData(POST_DATA *postData) {
+    POST_DATA *current = postData;
+    while (current != NULL) {
+        POST_DATA *temp = current;
+        current = current->next;
+        free(temp);
+    }
+}
 
+HTTP_RESPONSE get(const char *url, HEADERS *headers) {
     CURL *curl;
     CURLcode res;
 
@@ -64,6 +89,10 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
 
     struct MemoryStruct chunk;
     chunk.memory = malloc(1);
+    if (chunk.memory == NULL) {
+        printf("Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
     chunk.size = 0;
 
     curl = curl_easy_init();
@@ -71,6 +100,7 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
         struct curl_slist *headerList = NULL;
         HEADERS *temp = headers;
         while (temp != NULL) {
+            char str[248] = "";
             strcat(str, headers->key);
             strcat(str, ": ");
             strcat(str, headers->value);
@@ -88,6 +118,7 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         else {
             httpResponse.text = chunk.memory;
+
             res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(httpResponse.status));
             if (res != CURLE_OK)
                 fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
@@ -95,11 +126,85 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
             res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &(httpResponse.total_time));
             if (res != CURLE_OK)
                 fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+
         }
         curl_easy_cleanup(curl);
         curl_slist_free_all(headerList);
-        free(chunk.memory);
         freeHeaders(temp);
+    }
+    return httpResponse;
+}
+
+HTTP_RESPONSE post(const char *url, HEADERS *headers, POST_DATA *postData) {
+    CURL *curl;
+    CURLcode res;
+
+    HTTP_RESPONSE httpResponse;
+
+    struct MemoryStruct chunk;
+    chunk.memory = malloc(1);
+    if (chunk.memory == NULL) {
+        printf("Memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
+    chunk.size = 0;
+
+    curl = curl_easy_init();
+    if (curl) {
+        struct curl_slist *headerList = NULL;
+        HEADERS *temp = headers;
+        while (temp != NULL) {
+            char strHeader[248] = "";
+            strcat(strHeader, temp->key);
+            strcat(strHeader, ": ");
+            strcat(strHeader, temp->value);
+            headerList = curl_slist_append(headerList, strHeader);
+            temp = temp->next;
+        }
+
+        char strPostData[1024] = "";
+        POST_DATA *pTemp = postData;
+        while (pTemp != NULL) {
+            char *escapedKey = curl_easy_escape(curl, pTemp->key, 0);
+            char *escapedValue = curl_easy_escape(curl, pTemp->value, 0);
+
+            strcat(strPostData, escapedKey);
+            strcat(strPostData, "=");
+            strcat(strPostData, escapedValue);
+
+            curl_free(escapedKey);
+            curl_free(escapedValue);
+
+            pTemp = pTemp->next;
+            if (pTemp != NULL)
+                strcat(strPostData, "&");
+        }
+
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, strPostData);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) &chunk);
+
+        res = curl_easy_perform(curl);
+        if (res != CURLE_OK)
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        else {
+            httpResponse.text = chunk.memory;
+
+            res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(httpResponse.status));
+            if (res != CURLE_OK)
+                fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+
+            res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &(httpResponse.total_time));
+            if (res != CURLE_OK)
+                fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+
+        }
+        curl_easy_cleanup(curl);
+        curl_slist_free_all(headerList);
+        freeHeaders(temp);
+        freePostData(pTemp);
     }
     return httpResponse;
 }
