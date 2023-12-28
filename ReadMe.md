@@ -1,7 +1,7 @@
 <div align="center">
 <h1 align="center">libeasyhttp</h1>
 
-[![LICENSE](https://img.shields.io/badge/License-gpl3.0-red)]()
+[![LICENSE](https://img.shields.io/badge/License-MIT-red)]()
 
 <p>简易的http请求库</p>
 </div>
@@ -55,7 +55,8 @@ double total_time; //请求耗时
 
 注意：你所定义的**headerList**和**postData**不需要**free()**，我已经帮你处理了。
 ## 🎉许可证
-GPL3.0
+
+MIT
 
 ## 🎁Stars
 
