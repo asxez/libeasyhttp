@@ -10,8 +10,13 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     // 重新分配内存以存储新的数据
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);
     if (mem->memory == NULL) {
-        // Out of memory!
-        fprintf(stderr, "Not enough memory (realloc returned NULL)\n");
+        // Out of memory
+        fprintf(stderr,
+                "File -> %s\nFunction -> %s\nLine -> %d \nNot enough memory (realloc returned NULL)\n",
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
+        );
         return 0; // 如果内存分配失败，返回0表示出错
     }
 
@@ -24,7 +29,12 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
 HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
     HEADERS *newHeader = (HEADERS *) malloc(sizeof(HEADERS));
     if (newHeader == NULL) {
-        printf("Memory allocation failed!\n");
+        fprintf(stderr,
+                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
+        );
         return NULL;
     }
 
@@ -45,7 +55,12 @@ HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
 POST_DATA *addData(POST_DATA *postData, const char *key, const char *value) {
     POST_DATA *newData = (POST_DATA *) malloc(sizeof(POST_DATA));
     if (newData == NULL) {
-        printf("Memory allocation failed!\n");
+        fprintf(stderr,
+                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
+        );
         return NULL;
     }
 
@@ -90,7 +105,12 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
     struct MemoryStruct chunk;
     chunk.memory = malloc(1);
     if (chunk.memory == NULL) {
-        printf("Memory allocation failed\n");
+        fprintf(stderr,
+                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
+        );
         exit(EXIT_FAILURE);
     }
     chunk.size = 0;
@@ -121,11 +141,11 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
 
             res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(httpResponse.status));
             if (res != CURLE_OK)
-                fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+                fprintf(stderr, "curl_easy_getinfo() failed when get status: %s\n", curl_easy_strerror(res));
 
             res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &(httpResponse.total_time));
             if (res != CURLE_OK)
-                fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+                fprintf(stderr, "curl_easy_getinfo() failed when get total time: %s\n", curl_easy_strerror(res));
 
         }
         curl_easy_cleanup(curl);
@@ -144,7 +164,12 @@ HTTP_RESPONSE post(const char *url, HEADERS *headers, POST_DATA *postData) {
     struct MemoryStruct chunk;
     chunk.memory = malloc(1);
     if (chunk.memory == NULL) {
-        printf("Memory allocation failed\n");
+        fprintf(stderr,
+                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
+                __FILE__,
+                __FUNCTION__,
+                __LINE__
+        );
         exit(EXIT_FAILURE);
     }
     chunk.size = 0;
@@ -194,11 +219,11 @@ HTTP_RESPONSE post(const char *url, HEADERS *headers, POST_DATA *postData) {
 
             res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(httpResponse.status));
             if (res != CURLE_OK)
-                fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+                fprintf(stderr, "curl_easy_getinfo() failed when get status: %s\n", curl_easy_strerror(res));
 
             res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &(httpResponse.total_time));
             if (res != CURLE_OK)
-                fprintf(stderr, "curl_easy_getinfo() failed: %s\n", curl_easy_strerror(res));
+                fprintf(stderr, "curl_easy_getinfo() failed when get total time: %s\n", curl_easy_strerror(res));
 
         }
         curl_easy_cleanup(curl);
