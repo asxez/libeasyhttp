@@ -1,7 +1,8 @@
 #include <curl/curl.h>
 #include <string.h>
-#include "easy-http.h"
-
+#include "../include/easy-http.h"
+#include "../include/log.h"
+#include "../include/utils.h"
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     size_t realsize = size * nmemb; // 接收到数据的总大小
@@ -11,12 +12,7 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     mem->memory = realloc(mem->memory, mem->size + realsize + 1);
     if (mem->memory == NULL) {
         // Out of memory
-        fprintf(stderr,
-                "File -> %s\nFunction -> %s\nLine -> %d \nNot enough memory (realloc returned NULL)\n",
-                __FILE__,
-                __FUNCTION__,
-                __LINE__
-        );
+        error("Not enough memory (realloc returned NULL)");
         return 0; // 如果内存分配失败，返回0表示出错
     }
 
@@ -26,15 +22,10 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     return realsize; // 返回接收到的数据大小
 }
 
-HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
+HEADERS *addHeader(HEADERS *headers, cString key, cString value) {
     HEADERS *newHeader = (HEADERS *) malloc(sizeof(HEADERS));
     if (newHeader == NULL) {
-        fprintf(stderr,
-                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
-                __FILE__,
-                __FUNCTION__,
-                __LINE__
-        );
+        error("Memory allocation failed.");
         return NULL;
     }
 
@@ -52,15 +43,10 @@ HEADERS *addHeader(HEADERS *headers, const char *key, const char *value) {
     return headers;
 }
 
-POST_DATA *addData(POST_DATA *postData, const char *key, const char *value) {
+POST_DATA *addData(POST_DATA *postData, cString key, cString value) {
     POST_DATA *newData = (POST_DATA *) malloc(sizeof(POST_DATA));
     if (newData == NULL) {
-        fprintf(stderr,
-                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
-                __FILE__,
-                __FUNCTION__,
-                __LINE__
-        );
+        error("Memory allocation failed.");
         return NULL;
     }
 
@@ -96,7 +82,7 @@ void freePostData(POST_DATA *postData) {
     }
 }
 
-HTTP_RESPONSE get(const char *url, HEADERS *headers) {
+HTTP_RESPONSE get(cString url, HEADERS *headers) {
     CURL *curl;
     CURLcode res;
 
@@ -105,12 +91,7 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
     struct MemoryStruct chunk;
     chunk.memory = malloc(1);
     if (chunk.memory == NULL) {
-        fprintf(stderr,
-                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
-                __FILE__,
-                __FUNCTION__,
-                __LINE__
-        );
+        error("Memory allocation failed.");
         exit(EXIT_FAILURE);
     }
     chunk.size = 0;
@@ -155,7 +136,7 @@ HTTP_RESPONSE get(const char *url, HEADERS *headers) {
     return httpResponse;
 }
 
-HTTP_RESPONSE post(const char *url, HEADERS *headers, POST_DATA *postData) {
+HTTP_RESPONSE post(cString url, HEADERS *headers, POST_DATA *postData) {
     CURL *curl;
     CURLcode res;
 
@@ -164,12 +145,7 @@ HTTP_RESPONSE post(const char *url, HEADERS *headers, POST_DATA *postData) {
     struct MemoryStruct chunk;
     chunk.memory = malloc(1);
     if (chunk.memory == NULL) {
-        fprintf(stderr,
-                "File -> %s\nFunction -> %s\nLine -> %d \nMemory allocation failed.\n",
-                __FILE__,
-                __FUNCTION__,
-                __LINE__
-        );
+        error("Memory allocation failed.");
         exit(EXIT_FAILURE);
     }
     chunk.size = 0;
