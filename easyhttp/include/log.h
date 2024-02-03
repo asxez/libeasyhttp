@@ -4,10 +4,8 @@
 
 #ifndef C_LOG_H
 #define C_LOG_H
-#endif //C_LOG_H
 
 #include "utils.h"
-
 
 #define POST "\033[0m"  //结束
 #define GREEN_PRE "\033[32;1m" //绿色前缀
@@ -16,7 +14,7 @@
 #define YELLOW_PRE "\033[33;1m"
 
 void info(cString s);
-
 void warning(cString s);
-
 void error(cString s);
+
+#endif //C_LOG_H

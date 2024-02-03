@@ -4,7 +4,8 @@
 
 #ifndef C_UTILS_H
 #define C_UTILS_H
-#endif //C_UTILS_H
 
 typedef char *string;
 typedef const char *cString;
+
+#endif //C_UTILS_H

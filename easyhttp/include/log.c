@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../include/log.h"
+#include "log.h"
 
 void info(cString s) {
     fprintf(stdout, "%s%s%s %s|%s INFO     %s|%s %s%s:%s:%d%s - %s\n",

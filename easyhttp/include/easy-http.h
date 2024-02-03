@@ -4,7 +4,6 @@
 
 #ifndef C_EASY_HTTP_H
 #define C_EASY_HTTP_H
-#endif
 
 #include <stdio.h>
 #include "utils.h"
@@ -41,3 +40,5 @@ void freePostData(POST_DATA *postData);
 
 HTTP_RESPONSE get(cString url, HEADERS *headers); //get请求
 HTTP_RESPONSE post(cString url, HEADERS *headers, POST_DATA *postData); //post请求
+
+#endif

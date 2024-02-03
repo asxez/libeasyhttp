@@ -1,8 +1,8 @@
 #include <curl/curl.h>
 #include <string.h>
-#include "../include/easy-http.h"
-#include "../include/log.h"
-#include "../include/utils.h"
+#include "easy-http.h"
+#include "log.h"
+#include "utils.h"
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userdata) {
     size_t realsize = size * nmemb; // 接收到数据的总大小

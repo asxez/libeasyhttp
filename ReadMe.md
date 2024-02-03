@@ -19,7 +19,7 @@ int main(void) {
     headerList = addHeader(headerList, "User-Agent", "ASXE");
     
     HTTP_RESPONSE httpResponse = get("https://www.asxe.vip/", headerList);
-    prinft("%s", httpResponse.text);
+    printf("%s", httpResponse.text);
     return 0;
 }
 ```
